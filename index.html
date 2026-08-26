@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeatSync | Guitar Backing Track Drum Machine</title>
+    <meta name="description" content="A premium, interactive web-based step sequencer and drum machine designed to play backing beats while you play guitar in your room. Synthesized dynamically with Web Audio API.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=3">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Background decorative ambient glows -->
+        <div class="ambient-glow glow-1"></div>
+        <div class="ambient-glow glow-2"></div>
+
+        <header class="app-header">
+            <div class="logo-area">
+                <span class="logo-icon">🥁</span>
+                <h1>BeatSync</h1>
+                <span class="tag">GUITAR COMPANION</span>
+            </div>
+            
+            <div class="visualizer-container">
+                <canvas id="visualizer" width="300" height="60"></canvas>
+            </div>
+        </header>
+
+        <main class="app-grid">
+            <!-- Left Panel: Controls & Presets -->
+            <section class="control-panel glass">
+                <div class="panel-section">
+                    <h2>Playback Controls</h2>
+                    <div class="playback-buttons">
+                        <button id="btn-play" class="btn btn-primary" aria-label="Play">
+                            <span class="icon">▶</span> Play
+                        </button>
+                        <button id="btn-stop" class="btn btn-secondary" aria-label="Stop">
+                            <span class="icon">■</span> Stop
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h2>Tempo & Grooves</h2>
+                    <div class="control-group">
+                        <label for="input-bpm">BPM: <span id="val-bpm">120</span></label>
+                        <input type="range" id="input-bpm" min="60" max="220" value="120" step="1">
+                        <div class="bpm-tap-container">
+                            <button id="btn-tap" class="btn btn-small">Tap Tempo</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="input-swing">Swing: <span id="val-swing">0</span>%</label>
+                        <input type="range" id="input-swing" min="0" max="80" value="0" step="5">
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h2>Backing Presets</h2>
+                    <div class="preset-grid">
+                        <button class="btn btn-preset active" data-preset="rock">Rock</button>
+                        <button class="btn btn-preset" data-preset="blues">Blues Shuffle</button>
+                        <button class="btn btn-preset" data-preset="funk">Funk Groove</button>
+                        <button class="btn btn-preset" data-preset="hiphop">Hip Hop</button>
+                        <button class="btn btn-preset" data-preset="metal">Heavy Metal</button>
+                        <button class="btn btn-preset" data-preset="jazz">Swing Jazz</button>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h2>User Save Banks</h2>
+                    <div class="bank-grid">
+                        <button class="btn btn-bank" data-bank="0"><span class="indicator"></span>Bank 1</button>
+                        <button class="btn btn-bank" data-bank="1"><span class="indicator"></span>Bank 2</button>
+                        <button class="btn btn-bank" data-bank="2"><span class="indicator"></span>Bank 3</button>
+                        <button class="btn btn-bank" data-bank="3"><span class="indicator"></span>Bank 4</button>
+                        <button class="btn btn-bank" data-bank="4"><span class="indicator"></span>Bank 5</button>
+                        <button class="btn btn-bank" data-bank="5"><span class="indicator"></span>Bank 6</button>
+                    </div>
+                    <div class="bank-actions">
+                        <button id="btn-save-beat" class="btn btn-save">Save Current Beat</button>
+                    </div>
+                    <p class="bank-hint">Each bank is independent · Edits auto-save when switching</p>
+                </div>
+
+                <div class="panel-section">
+                    <h2>Mixer & Master</h2>
+                    <div class="control-group">
+                        <label for="input-volume">Master Volume</label>
+                        <input type="range" id="input-volume" min="0" max="100" value="80" step="1">
+                    </div>
+
+                    <h3 class="fx-title">Master FX Chain</h3>
+                    <div class="control-group">
+                        <label for="input-punch">Punch (Comp): <span id="val-punch">30</span>%</label>
+                        <input type="range" id="input-punch" min="0" max="100" value="30" step="1">
+                    </div>
+                    <div class="control-group">
+                        <label for="input-bass">Bass Boost: <span id="val-bass">0</span> dB</label>
+                        <input type="range" id="input-bass" min="-6" max="12" value="0" step="1">
+                    </div>
+                    <div class="control-group">
+                        <label for="input-treble">Treble Boost: <span id="val-treble">0</span> dB</label>
+                        <input type="range" id="input-treble" min="-6" max="12" value="0" step="1">
+                    </div>
+
+                    <button id="btn-clear" class="btn btn-danger">Clear Grid</button>
+                </div>
+            </section>
+
+            <!-- Right Panel: Sequencer Grid -->
+            <section class="sequencer-panel glass">
+                <div class="sequencer-header">
+                    <div class="tracks-title">Instrument</div>
+                    <div class="steps-indicators" id="steps-indicator-container">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+                
+                <div class="sequencer-grid" id="sequencer-grid-container">
+                    <!-- Tracks populated dynamically by JavaScript -->
+                </div>
+
+                <!-- Beat subdivisions labels -->
+                <div class="sequencer-footer">
+                    <div class="empty-spacer"></div>
+                    <div class="beat-numbers">
+                        <span>1</span>
+                        <span>2</span>
+                        <span>3</span>
+                        <span>4</span>
+                        <span>5</span>
+                        <span>6</span>
+                        <span>7</span>
+                        <span>8</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>Designed for bedroom guitarists. Plug in, tune up, and jam. 🎸</p>
+        </footer>
+    </div>
+
+    <script src="app.js?v=3"></script>
+</body>
+</html>
+
