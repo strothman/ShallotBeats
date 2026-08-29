@@ -7,9 +7,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-- Additional genre presets (Latin Bossa, Double Bass Metal, Reggae).
-- MIDI keyboard / pad input trigger support.
-- WAV audio pattern export capability.
+- Audio stem multi-track export (individual WAV files per instrument).
+- Chord progression backing track player.
+
+---
+
+## [2.0.0] - 2026-08-28 — Pro Edition
+
+### Added
+- **Song Section Arranger (Verse / Chorus)**:
+  - Added independent **Pattern A (Verse)** and **Pattern B (Chorus)** memory per bank.
+  - Seamless bar-synchronized switching via header button or <kbd>Tab</kbd> shortcut.
+  - Added Quick Tool to duplicate Pattern A into Pattern B.
+- **4-Beat Count-In Pre-Roll**:
+  - Added metronome countdown (<kbd>⏱ Count-In</kbd>) with live visual banner before loop starts.
+- **Dynamic Drum Fills & Auto-Fill**:
+  - Added manual **Trigger Fill** button (<kbd>F</kbd>) injecting a snare/tom build-up and cymbal downbeat crash.
+  - Added configurable Auto-Fill setting (Every 4 or 8 bars) in Settings.
+- **Studio Room Reverb & Humanize Engine**:
+  - Synthetic acoustic room impulse response with dedicated Room Reverb dry/wet slider.
+  - Organic Humanize slider adding micro-timing jitter (±0–4ms) and velocity randomness.
+- **3-Stage Hit Velocity**:
+  - Steps cycle between `Normal` (Gain 0.75), `Accent` (Gain 1.0), and `Ghost` (Gain 0.35).
+  - Distinct visual node badges (solid glow, double-border accent, dashed ghost ring).
+- **12 Curated Guitar Presets**:
+  - Added **90s Grunge**, **Punk D-Beat**, **Reggae Drop**, **Country Train**, **Motown Soul**, and **Bossa Nova** to existing Rock, Blues, Funk, Hip Hop, Metal, and Jazz.
+- **WAV & MIDI Export**:
+  - 1-click offline audio rendering producing downloadable 16-bit 44.1kHz `.wav` loop files.
+  - Standard Type 0 `.mid` MIDI file generator with General MIDI drum mapping.
+- **Interactive Live Drum Pads**:
+  - 18 clickable/touch drum pads with QWERTY keyboard mapping (`Q`–`P`, `A`–`K`) and visual press animations.
+- **Per-Track Solo (`S`) & Track Nudge**:
+  - Added Solo buttons alongside Mute on all 18 tracks.
+  - Added 1-step pattern nudge buttons (`◀`/`▶`) per track.
+- **Web MIDI API Support**:
+  - Integrated controller and USB footswitch support (Note On triggers, MIDI Start/Stop transport).
 
 ---
 
@@ -21,7 +53,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **ShallotBeats Rebranding**:
   - Rebranded project from BeatSync to **ShallotBeats** across UI, header logo, metadata, and documentation.
   - Upgraded launcher scripts to reflect ShallotBeats.
-  - Updated storage keys with seamless backwards compatibility.
 
 ---
 
@@ -29,24 +60,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 - **Application Settings Panel**:
-  - Added dedicated glassmorphic Settings modal accessible from the header (`⚙️` button) or `Esc` key.
-  - Live version & revision display badge (`v1.2.0 - Shallot Edition`) in both Settings and the app footer.
-  - Theme selection preview cards with live radio toggles synchronizing with header buttons.
-  - Optional **Metronome Quarter-Click** toggle (audible woodblock click on downbeats and quarter notes).
-  - High-precision audio scheduling status indicator.
-  - Complete **Keyboard Shortcuts** guide.
-  - **Storage & Banks Reset** tool with confirmation safeguards.
+  - Added glassmorphic Settings modal with version badge (`v1.2.0`), theme options, metronome click, and bank reset.
 - **Global Keyboard Shortcuts**:
-  - `Space`: Instant Play / Pause toggle.
-  - `S`: Stop & rewind playhead.
-  - `T`: Tap Tempo input.
-  - `C`: Clear active sequencer grid.
-  - `1` - `6`: Quick-load genre presets (Rock, Blues, Funk, Hip Hop, Metal, Jazz).
-  - `Esc`: Close modal dialog.
-
-### Changed
-- Updated `app.js` architecture with centralized `APP_VERSION` tracking across the UI.
-- Upgraded visualizer layout and header spacing for cleaner alignment on all display sizes.
+  - <kbd>Space</kbd>, <kbd>S</kbd>, <kbd>T</kbd>, <kbd>C</kbd>, <kbd>1</kbd>–<kbd>6</kbd>, <kbd>Esc</kbd>.
 
 ---
 
@@ -54,43 +70,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 - **Shallot Plum Theme**:
-  - Implemented signature Deep Velvet Plum (`#180d21`) and Copper Glow (`#d48244`) color palette from the Shallot cooking app design system.
-  - Added [`shallot-theme.css`](shallot-theme.css) containing all design tokens, surfaces, borders, and typography variables.
-  - Added [`THEME.md`](THEME.md) specification documentation.
-  - Added header theme toggle button (`🧅 Plum` / `⚡ Neon`) with persistent `localStorage` synchronization.
-  - Adapted waveform oscilloscope canvas visualizer to render warm copper and golden amber glow when Plum theme is active.
-- **Windowless Desktop Launchers**:
-  - Added [`launch.bat`](launch.bat) for zero-console windowless launches.
-  - Added [`launch_app.bat`](launch_app.bat) to launch Microsoft Edge or Google Chrome in standalone desktop `--app` mode with optimized window dimensions.
-  - Added [`launch_silent.vbs`](launch_silent.vbs) silent WScript executor.
-- **Documentation**:
-  - Created [`README.md`](README.md) with full feature list, sound architecture table, launch guide, and project layout.
-  - Created [`CHANGELOG.md`](CHANGELOG.md) to maintain revision history.
-
-### Changed
-- Refactored [`style.css`](style.css) to support CSS custom property theme tokens across all panels, sequencer steps, sliders, and buttons.
-- Updated [`index.html`](index.html) header structure to incorporate theme switcher controls alongside visualizer.
+  - Implemented Deep Velvet Plum (`#180d21`) and Copper Glow (`#d48244`) color palette.
+  - Added [`shallot-theme.css`](shallot-theme.css) and [`THEME.md`](THEME.md).
+  - Added windowless desktop launchers (`launch.bat`, `launch_app.bat`, `launch_silent.vbs`).
 
 ---
 
 ## [1.0.0] - 2026-08-28
 
 ### Added
-- **18 Drum Instruments**:
-  - Integrated 15 acoustic drum samples from the Pearl Master Studio kit (Kick, Snares, Hats, Rides, Crashes, Splashes, Toms).
-  - Built Web Audio API synthetic instruments for Clap, 808 Cowbell, and Snappy Rimshot.
-- **32-Step Sequencer**:
-  - Implemented 32-step grid with 4-step measure accenting.
-  - Added dynamic step highlighting and playhead indicators.
-- **Backing Presets**:
-  - Added 6 instant presets: Rock, Blues Shuffle (50% swing), Funk Groove, Hip Hop, Heavy Metal, and Swing Jazz.
-- **User Save Banks**:
-  - Built 6 independent user save banks with custom naming, instant recall, and persistent storage in `localStorage`.
-- **Master FX Section**:
-  - Integrated Master Dynamics Compressor (Punch control).
-  - Integrated Low-shelf Bass EQ and High-shelf Treble EQ filters.
-  - Real-time Master Volume control.
-- **Timing Engine**:
-  - Lookahead Web Audio API scheduler for rock-solid timing.
-  - BPM slider (60–220 BPM) with Tap Tempo detection.
-  - Configurable swing / shuffle percentage.
+- Initial release with 18 instruments, 32 steps, 6 presets, 6 save banks, compressor, and EQ.

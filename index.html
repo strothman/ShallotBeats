@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShallotBeats | Guitar Backing Track Drum Machine</title>
-    <meta name="description" content="ShallotBeats — A premium, interactive web-based step sequencer and drum machine designed to play backing beats while you play guitar in your room. Synthesized dynamically with Web Audio API.">
+    <title>ShallotBeats Pro | Guitar Backing Track Drum Machine</title>
+    <meta name="description" content="ShallotBeats Pro — A studio-grade interactive step sequencer and drum machine designed for bedroom guitarists and producers. Features 18 Pearl & synth instruments, Room Reverb, 12 genre kits, 3-stage velocity, WAV/MIDI export, and MIDI pedal support.">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=6">
+    <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
     <div class="app-container">
@@ -17,11 +17,24 @@
         <div class="ambient-glow glow-1"></div>
         <div class="ambient-glow glow-2"></div>
 
+        <!-- Count-In Pre-Roll Banner -->
+        <div id="countin-banner" class="countin-banner">
+            COUNT-IN: <span id="countin-step">1</span>
+        </div>
+
         <header class="app-header">
             <div class="logo-area">
                 <span class="logo-icon">🧅</span>
                 <h1>ShallotBeats</h1>
-                <span class="tag">GUITAR COMPANION</span>
+                <span class="tag">PRO EDITION</span>
+            </div>
+
+            <!-- Song Section Arranger (Verse / Chorus) -->
+            <div class="header-center">
+                <div class="pattern-switcher" title="Song Section (Verse / Chorus)">
+                    <button class="btn-pattern active" data-pattern="A">Verse (A)</button>
+                    <button class="btn-pattern" data-pattern="B">Chorus (B)</button>
+                </div>
             </div>
             
             <div class="header-right">
@@ -31,10 +44,10 @@
                 </div>
 
                 <div class="visualizer-container">
-                    <canvas id="visualizer" width="280" height="50"></canvas>
+                    <canvas id="visualizer" width="240" height="42"></canvas>
                 </div>
 
-                <button id="btn-open-settings" class="btn-icon" title="Open Settings" aria-label="Settings">
+                <button id="btn-open-settings" class="btn-icon" title="Settings & MIDI Setup" aria-label="Settings">
                     <span class="icon">⚙️</span>
                 </button>
             </div>
@@ -44,7 +57,7 @@
             <!-- Left Panel: Controls & Presets -->
             <section class="control-panel glass">
                 <div class="panel-section">
-                    <h2>Playback Controls</h2>
+                    <h2>Playback & Jamming</h2>
                     <div class="playback-buttons">
                         <button id="btn-play" class="btn btn-primary" aria-label="Play">
                             <span class="icon">▶</span> Play
@@ -53,15 +66,24 @@
                             <span class="icon">■</span> Stop
                         </button>
                     </div>
+
+                    <div class="performance-buttons">
+                        <button id="btn-countin" class="btn btn-action" title="Toggle 4-Beat Pre-Roll Count-in">
+                            <span class="icon">⏱</span> Count-In
+                        </button>
+                        <button id="btn-fill" class="btn btn-fill" title="Inject Dynamic Drum Fill into Bar 1">
+                            <span class="icon">💥</span> Trigger Fill
+                        </button>
+                    </div>
                 </div>
 
                 <div class="panel-section">
                     <h2>Tempo & Grooves</h2>
                     <div class="control-group">
                         <label for="input-bpm">BPM: <span id="val-bpm">120</span></label>
-                        <input type="range" id="input-bpm" min="60" max="220" value="120" step="1">
+                        <input type="range" id="input-bpm" min="50" max="240" value="120" step="1">
                         <div class="bpm-tap-container">
-                            <button id="btn-tap" class="btn btn-small">Tap Tempo</button>
+                            <button id="btn-tap" class="btn btn-small">Tap Tempo (T)</button>
                         </div>
                     </div>
 
@@ -69,22 +91,33 @@
                         <label for="input-swing">Swing: <span id="val-swing">0</span>%</label>
                         <input type="range" id="input-swing" min="0" max="80" value="0" step="5">
                     </div>
+
+                    <div class="control-group">
+                        <label for="input-humanize">Humanize: <span id="val-humanize">15</span>%</label>
+                        <input type="range" id="input-humanize" min="0" max="100" value="15" step="5" title="Organic micro-timing and velocity humanization">
+                    </div>
                 </div>
 
                 <div class="panel-section">
-                    <h2>Backing Presets</h2>
+                    <h2>Backing Presets (12 Kits)</h2>
                     <div class="preset-grid">
-                        <button class="btn btn-preset active" data-preset="rock">Rock</button>
+                        <button class="btn btn-preset active" data-preset="rock">Rock Beat</button>
                         <button class="btn btn-preset" data-preset="blues">Blues Shuffle</button>
+                        <button class="btn btn-preset" data-preset="grunge">90s Grunge</button>
+                        <button class="btn btn-preset" data-preset="punk">Punk D-Beat</button>
                         <button class="btn btn-preset" data-preset="funk">Funk Groove</button>
-                        <button class="btn btn-preset" data-preset="hiphop">Hip Hop</button>
+                        <button class="btn btn-preset" data-preset="hiphop">Boom Bap</button>
                         <button class="btn btn-preset" data-preset="metal">Heavy Metal</button>
+                        <button class="btn btn-preset" data-preset="reggae">Reggae Drop</button>
+                        <button class="btn btn-preset" data-preset="country">Country Train</button>
+                        <button class="btn btn-preset" data-preset="motown">Motown Soul</button>
+                        <button class="btn btn-preset" data-preset="bossa">Bossa Nova</button>
                         <button class="btn btn-preset" data-preset="jazz">Swing Jazz</button>
                     </div>
                 </div>
 
                 <div class="panel-section">
-                    <h2>User Save Banks</h2>
+                    <h2>User Banks & Export</h2>
                     <div class="bank-grid">
                         <button class="btn btn-bank" data-bank="0"><span class="indicator"></span>Bank 1</button>
                         <button class="btn btn-bank" data-bank="1"><span class="indicator"></span>Bank 2</button>
@@ -93,20 +126,33 @@
                         <button class="btn btn-bank" data-bank="4"><span class="indicator"></span>Bank 5</button>
                         <button class="btn btn-bank" data-bank="5"><span class="indicator"></span>Bank 6</button>
                     </div>
+
                     <div class="bank-actions">
                         <button id="btn-save-beat" class="btn btn-save">Save Current Beat</button>
+                        <div class="export-grid">
+                            <button id="btn-export-wav" class="btn-export" title="Render and download loop as WAV audio file">
+                                <span>📥</span> Export WAV
+                            </button>
+                            <button id="btn-export-midi" class="btn-export" title="Export loop as standard MIDI file">
+                                <span>🎹</span> Export MIDI
+                            </button>
+                        </div>
                     </div>
-                    <p class="bank-hint">Each bank is independent · Edits auto-save when switching</p>
+                    <p class="bank-hint">Auto-saves Pattern A & B independently</p>
                 </div>
 
                 <div class="panel-section">
-                    <h2>Mixer & Master</h2>
+                    <h2>Mixer & Master FX</h2>
                     <div class="control-group">
                         <label for="input-volume">Master Volume</label>
                         <input type="range" id="input-volume" min="0" max="100" value="80" step="1">
                     </div>
 
-                    <h3 class="fx-title">Master FX Chain</h3>
+                    <h3 class="fx-title">Studio Room & Dynamics</h3>
+                    <div class="control-group">
+                        <label for="input-reverb">Room Reverb: <span id="val-reverb">25</span>%</label>
+                        <input type="range" id="input-reverb" min="0" max="100" value="25" step="1" title="Acoustic room space simulation">
+                    </div>
                     <div class="control-group">
                         <label for="input-punch">Punch (Comp): <span id="val-punch">30</span>%</label>
                         <input type="range" id="input-punch" min="0" max="100" value="30" step="1">
@@ -120,53 +166,88 @@
                         <input type="range" id="input-treble" min="-6" max="12" value="0" step="1">
                     </div>
 
-                    <button id="btn-clear" class="btn btn-danger">Clear Grid</button>
+                    <button id="btn-clear" class="btn btn-danger">Clear Active Grid (C)</button>
                 </div>
             </section>
 
-            <!-- Right Panel: Sequencer Grid -->
-            <section class="sequencer-panel glass">
-                <div class="sequencer-header">
-                    <div class="tracks-title">Instrument</div>
-                    <div class="steps-indicators" id="steps-indicator-container">
-                        <!-- Filled by JS -->
-                    </div>
-                </div>
-                
-                <div class="sequencer-grid" id="sequencer-grid-container">
-                    <!-- Tracks populated dynamically by JavaScript -->
-                </div>
+            <!-- Right Panel: Sequencer Grid & Live Pads -->
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <section class="sequencer-panel glass">
+                    <div class="sequencer-toolbar">
+                        <div class="sequencer-title">
+                            <span>32-Step Sequencer</span>
+                            <span class="tag" id="current-pattern-tag">PATTERN A (VERSE)</span>
+                        </div>
 
-                <!-- Beat subdivisions labels -->
-                <div class="sequencer-footer">
-                    <div class="empty-spacer"></div>
-                    <div class="beat-numbers">
-                        <span>1</span>
-                        <span>2</span>
-                        <span>3</span>
-                        <span>4</span>
-                        <span>5</span>
-                        <span>6</span>
-                        <span>7</span>
-                        <span>8</span>
+                        <div class="velocity-legend">
+                            <span class="legend-item"><span class="legend-dot dot-normal"></span> Normal</span>
+                            <span class="legend-item"><span class="legend-dot dot-accent"></span> Accent</span>
+                            <span class="legend-item"><span class="legend-dot dot-ghost"></span> Ghost</span>
+                        </div>
+
+                        <div class="sequencer-quick-tools">
+                            <button id="btn-tool-double" class="btn btn-small" title="Duplicate first 16 steps into steps 17-32">
+                                ✂️ 16→32
+                            </button>
+                            <button id="btn-tool-copy-pattern" class="btn btn-small" title="Copy Pattern A to Pattern B">
+                                📋 Copy to B
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </section>
+
+                    <div class="sequencer-header">
+                        <div class="tracks-title">Instrument</div>
+                        <div class="steps-indicators" id="steps-indicator-container">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <div class="sequencer-grid" id="sequencer-grid-container">
+                        <!-- Tracks populated dynamically by JavaScript -->
+                    </div>
+
+                    <!-- Beat subdivisions labels -->
+                    <div class="sequencer-footer">
+                        <div class="empty-spacer"></div>
+                        <div class="beat-numbers">
+                            <span>1</span>
+                            <span>2</span>
+                            <span>3</span>
+                            <span>4</span>
+                            <span>5</span>
+                            <span>6</span>
+                            <span>7</span>
+                            <span>8</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Interactive Live Drum Pads Grid -->
+                <section class="pads-panel glass">
+                    <h2>
+                        <span>Live Drum Pads (Playable Keyboard & MIDI)</span>
+                        <span class="pads-hint">Keys Q-P, A-L trigger pads · Click to play</span>
+                    </h2>
+                    <div class="pads-grid" id="pads-grid-container">
+                        <!-- Drum Pads populated by JS -->
+                    </div>
+                </section>
+            </div>
         </main>
 
         <footer class="app-footer">
-            <p>Designed by Shallot for bedroom guitarists. Plug in, tune up, and jam. 🎸</p>
-            <span class="footer-version" id="footer-app-version">ShallotBeats v1.3.0</span>
+            <p>Designed by Shallot for bedroom guitarists & producers. Plug in, tune up, and jam. 🎸</p>
+            <span class="footer-version" id="footer-app-version">ShallotBeats v2.0.0 Pro</span>
         </footer>
     </div>
 
-    <!-- Settings Modal -->
+    <!-- Settings & MIDI Setup Modal -->
     <div id="settings-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
         <div class="modal-card glass">
             <div class="modal-header">
                 <div class="modal-title-area">
                     <span class="modal-icon">⚙️</span>
-                    <h2 id="settings-title">Settings</h2>
+                    <h2 id="settings-title">ShallotBeats Pro Settings</h2>
                 </div>
                 <button id="btn-close-settings" class="btn-close" aria-label="Close Settings">✕</button>
             </div>
@@ -176,12 +257,13 @@
                 <div class="settings-section version-banner">
                     <div class="version-info">
                         <span class="app-name">ShallotBeats</span>
-                        <span class="version-badge" id="settings-app-version">v1.3.0</span>
+                        <span class="version-badge" id="settings-app-version">v2.0.0 PRO</span>
                     </div>
-                    <p class="version-subtitle">Guitar Backing Track Drum Machine & Step Sequencer by Shallot</p>
+                    <p class="version-subtitle">Pro Step Sequencer & Guitar Backing Drum Machine by Shallot</p>
                     <div class="build-meta">
-                        <span>Revision: <strong>1.3.0 (Shallot Edition)</strong></span>
+                        <span>Revision: <strong>2.0.0 Pro Edition</strong></span>
                         <span>License: <strong>MIT</strong></span>
+                        <span>MIDI: <strong id="midi-status-text">Detecting...</strong></span>
                     </div>
                 </div>
 
@@ -198,7 +280,7 @@
                             </div>
                             <div class="theme-card-text">
                                 <strong>Shallot Plum</strong>
-                                <small>Velvet plum & copper glow</small>
+                                <small>Signature velvet plum & copper glow</small>
                             </div>
                         </label>
 
@@ -211,54 +293,62 @@
                             </div>
                             <div class="theme-card-text">
                                 <strong>Cyberpunk Neon</strong>
-                                <small>Graphite, cyan & magenta</small>
+                                <small>Graphite, electric cyan & magenta</small>
                             </div>
                         </label>
                     </div>
                 </div>
 
-                <!-- Audio & Sequencer Preferences -->
+                <!-- Jam & Performance Preferences -->
                 <div class="settings-section">
-                    <h3>Audio & Sequencer Preferences</h3>
+                    <h3>Jamming & Auto-Fill Rules</h3>
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <strong>Auto-Fill Frequency</strong>
+                            <small>Automatically triggers drum fill before loop restarts</small>
+                        </div>
+                        <select id="select-autofill" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid var(--panel-border); border-radius: 6px; padding: 4px 8px;">
+                            <option value="0">Off (Manual Only)</option>
+                            <option value="4">Every 4 Loops</option>
+                            <option value="8">Every 8 Loops</option>
+                        </select>
+                    </div>
                     <div class="setting-row">
                         <div class="setting-label">
                             <strong>Metronome Quarter-Click</strong>
-                            <small>Subtle woodblock tick on quarter notes during playback</small>
+                            <small>Audible woodblock tick on quarter notes</small>
                         </div>
                         <label class="toggle-switch">
                             <input type="checkbox" id="toggle-metronome">
                             <span class="slider"></span>
                         </label>
                     </div>
-                    <div class="setting-row">
-                        <div class="setting-label">
-                            <strong>Lookahead Timing Engine</strong>
-                            <small>Rock-solid Web Audio scheduler (25ms buffer)</small>
-                        </div>
-                        <span class="status-pill">Active</span>
-                    </div>
                 </div>
 
-                <!-- Keyboard Shortcuts Reference -->
+                <!-- Keyboard & MIDI Shortcuts -->
                 <div class="settings-section">
-                    <h3>Keyboard Shortcuts</h3>
+                    <h3>Keyboard & Hardware Shortcuts</h3>
                     <div class="shortcuts-grid">
                         <div class="shortcut-item"><kbd>Space</kbd> <span>Play / Pause</span></div>
                         <div class="shortcut-item"><kbd>S</kbd> <span>Stop & Rewind</span></div>
+                        <div class="shortcut-item"><kbd>F</kbd> <span>Trigger Fill</span></div>
+                        <div class="shortcut-item"><kbd>Tab</kbd> <span>Toggle Verse/Chorus</span></div>
                         <div class="shortcut-item"><kbd>T</kbd> <span>Tap Tempo</span></div>
                         <div class="shortcut-item"><kbd>C</kbd> <span>Clear Grid</span></div>
-                        <div class="shortcut-item"><kbd>1 - 6</kbd> <span>Load Presets</span></div>
-                        <div class="shortcut-item"><kbd>Esc</kbd> <span>Close Modal</span></div>
+                        <div class="shortcut-item"><kbd>1 - 9</kbd> <span>Load Presets</span></div>
+                        <div class="shortcut-item"><kbd>Q - P</kbd> <span>Play Drum Pads</span></div>
+                        <div class="shortcut-item"><kbd>MIDI Pedal</kbd> <span>Start / Stop / Fills</span></div>
+                        <div class="shortcut-item"><kbd>Esc</kbd> <span>Close Dialog</span></div>
                     </div>
                 </div>
 
                 <!-- Data & Bank Reset -->
                 <div class="settings-section danger-zone">
-                    <h3>Storage & Banks</h3>
+                    <h3>Storage & Reset</h3>
                     <div class="setting-row">
                         <div class="setting-label">
-                            <strong>Reset Saved Beats</strong>
-                            <small>Clear all 6 custom user bank patterns from memory</small>
+                            <strong>Reset All Saved Beats</strong>
+                            <small>Clear all custom user bank patterns from local storage</small>
                         </div>
                         <button id="btn-reset-banks" class="btn btn-small btn-danger-outline">Reset Banks</button>
                     </div>
@@ -271,6 +361,6 @@
         </div>
     </div>
 
-    <script src="app.js?v=6"></script>
+    <script src="app.js?v=8"></script>
 </body>
 </html>
