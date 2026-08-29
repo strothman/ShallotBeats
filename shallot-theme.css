@@ -1,0 +1,73 @@
+/**
+ * BeatSync — Shallot Plum Theme Design Tokens & CSS Variables
+ * Signature Deep Velvet Plum & Copper Glow Palette
+ * Copyright (c) 2026 Shallot (strothman)
+ */
+
+:root,
+[data-theme="plum"] {
+    /* Surfaces & Backgrounds */
+    --shallot-bg-app: #180d21;
+    --shallot-bg-card: #261533;
+    --shallot-bg-header: rgba(38, 21, 51, 0.85);
+    --shallot-bg-overlay: rgba(14, 7, 19, 0.82);
+
+    /* Brand & Accent Colors */
+    --shallot-primary: #d48244;             /* Warm Shallot Copper / Amber Glow */
+    --shallot-primary-light: #3d234a;       /* Soft Purple-Plum Tint for Chips & Active States */
+    --shallot-primary-hover: #e69150;       /* Brightened Copper */
+    --shallot-accent: #f39c12;              /* Golden Core Glow */
+    --shallot-deep-plum: #4a1d6a;           /* Royal Shallot Plum */
+
+    /* Text & Typography */
+    --shallot-text-main: #f5eff9;           /* Pure Soft Lilac-White */
+    --shallot-text-muted: #bda8c7;          /* Muted Lavender Grey */
+    --shallot-border: rgba(212, 130, 68, 0.22); /* Subtle Copper Glass Border */
+
+    /* Semantic Feedback */
+    --shallot-success: #2ecc71;
+    --shallot-warning: #e67e22;
+    --shallot-danger: #e74c3c;
+    --shallot-info: #3498db;
+
+    /* Mapped Drum App Tokens */
+    --bg-color: var(--shallot-bg-app);
+    --panel-bg: rgba(38, 21, 51, 0.78);
+    --panel-border: var(--shallot-border);
+    --text-primary: var(--shallot-text-main);
+    --text-secondary: var(--shallot-text-muted);
+    --accent-glow: rgba(212, 130, 68, 0.35);
+    --color-primary: var(--shallot-primary);
+    --color-primary-hover: var(--shallot-primary-hover);
+    --color-secondary: var(--shallot-accent);
+    --color-secondary-hover: #f1c40f;
+    --color-danger: var(--shallot-danger);
+    --color-danger-hover: #ff5252;
+    --step-off: #20112b;
+    --step-on: var(--shallot-primary);
+    --step-accent-on: var(--shallot-accent);
+    --step-active-glow: rgba(212, 130, 68, 0.55);
+    --glow-1-color: #581d7f;
+    --glow-2-color: #d48244;
+}
+
+[data-theme="neon"] {
+    --bg-color: #0b0c10;
+    --panel-bg: rgba(22, 26, 37, 0.65);
+    --panel-border: rgba(255, 255, 255, 0.08);
+    --text-primary: #f5f6f8;
+    --text-secondary: #8f9cae;
+    --accent-glow: rgba(138, 43, 226, 0.4);
+    --color-primary: #8a2be2;
+    --color-primary-hover: #9d4edd;
+    --color-secondary: #00f2fe;
+    --color-secondary-hover: #4facfe;
+    --color-danger: #ff0055;
+    --color-danger-hover: #ff3377;
+    --step-off: #1b1e29;
+    --step-on: #00f2fe;
+    --step-accent-on: #ff0055;
+    --step-active-glow: rgba(0, 242, 254, 0.5);
+    --glow-1-color: #8a2be2;
+    --glow-2-color: #00f2fe;
+}

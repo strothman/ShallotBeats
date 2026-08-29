@@ -1,5 +1,8 @@
 // BeatSync App Logic — 18 Instruments × 32 Steps
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Application Version ---
+    const APP_VERSION = '1.2.0';
+
     // --- State and Config ---
     let audioCtx = null;
     let masterGain = null;
@@ -12,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let bpm = 120;
     let swing = 0; // 0 to 80
     let activeBank = null; // Currently selected bank (0 to 5)
+    let metronomeEnabled = false;
 
     // Scheduler variables
     const TOTAL_STEPS = 32;
@@ -66,15 +70,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Helper to make 32-step arrays from shorter notation
-    // p = pattern array of 0/1, repeated or padded to 32
     const p = (...bits) => {
         const arr = bits.map(b => !!b);
         while (arr.length < TOTAL_STEPS) arr.push(false);
         return arr.slice(0, TOTAL_STEPS);
     };
-    // Convenience: double a 16-step pattern into 32
     const d = (a16) => [...a16, ...a16];
-    const z = () => new Array(TOTAL_STEPS).fill(false); // silence
+    const z = () => new Array(TOTAL_STEPS).fill(false);
 
     // --- Presets (32 steps each) ---
     const presets = {
@@ -200,6 +202,97 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSaveBeat = document.getElementById('btn-save-beat');
     const canvas = document.getElementById('visualizer');
     const canvasCtx = canvas.getContext('2d');
+    const btnThemePlum = document.getElementById('btn-theme-plum');
+    const btnThemeNeon = document.getElementById('btn-theme-neon');
+
+    // Settings Modal Elements
+    const btnOpenSettings = document.getElementById('btn-open-settings');
+    const btnCloseSettings = document.getElementById('btn-close-settings');
+    const btnDoneSettings = document.getElementById('btn-done-settings');
+    const settingsModal = document.getElementById('settings-modal');
+    const settingsAppVersion = document.getElementById('settings-app-version');
+    const footerAppVersion = document.getElementById('footer-app-version');
+    const toggleMetronome = document.getElementById('toggle-metronome');
+    const btnResetBanks = document.getElementById('btn-reset-banks');
+    const themeCards = document.querySelectorAll('.theme-card-option');
+
+    // Initialize Version Display
+    if (settingsAppVersion) settingsAppVersion.textContent = `v${APP_VERSION}`;
+    if (footerAppVersion) footerAppVersion.textContent = `BeatSync v${APP_VERSION}`;
+
+    // --- Theme Management ---
+    let currentTheme = localStorage.getItem('beatsync_theme') || 'plum';
+
+    function applyTheme(theme) {
+        currentTheme = theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('beatsync_theme', theme);
+
+        if (btnThemePlum && btnThemeNeon) {
+            btnThemePlum.classList.toggle('active', theme === 'plum');
+            btnThemeNeon.classList.toggle('active', theme === 'neon');
+        }
+
+        // Synchronize Settings Modal Radio Cards
+        themeCards.forEach(card => {
+            const choice = card.dataset.themeChoice;
+            const radio = card.querySelector('input[type="radio"]');
+            const isActive = choice === theme;
+            card.classList.toggle('active', isActive);
+            if (radio) radio.checked = isActive;
+        });
+    }
+
+    if (btnThemePlum) btnThemePlum.addEventListener('click', () => applyTheme('plum'));
+    if (btnThemeNeon) btnThemeNeon.addEventListener('click', () => applyTheme('neon'));
+
+    themeCards.forEach(card => {
+        card.addEventListener('click', (e) => {
+            const choice = card.dataset.themeChoice;
+            if (choice) applyTheme(choice);
+        });
+    });
+
+    applyTheme(currentTheme);
+
+    // --- Settings Modal Handlers ---
+    function openSettings() {
+        if (settingsModal) settingsModal.classList.remove('hidden');
+    }
+
+    function closeSettings() {
+        if (settingsModal) settingsModal.classList.add('hidden');
+    }
+
+    if (btnOpenSettings) btnOpenSettings.addEventListener('click', openSettings);
+    if (btnCloseSettings) btnCloseSettings.addEventListener('click', closeSettings);
+    if (btnDoneSettings) btnDoneSettings.addEventListener('click', closeSettings);
+
+    if (settingsModal) {
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) closeSettings();
+        });
+    }
+
+    // Metronome Toggle
+    if (toggleMetronome) {
+        toggleMetronome.addEventListener('change', (e) => {
+            metronomeEnabled = e.target.checked;
+        });
+    }
+
+    // Reset Banks Handler
+    if (btnResetBanks) {
+        btnResetBanks.addEventListener('click', () => {
+            if (confirm("Are you sure you want to reset all 6 User Banks? This will erase any custom saved patterns.")) {
+                for (let i = 0; i < 6; i++) {
+                    localStorage.removeItem(`beatsync_bank_${i}`);
+                }
+                initUserBanks();
+                alert("All user banks have been reset.");
+            }
+        });
+    }
 
     // --- Setup Audio & Node Graph ---
     function initAudio() {
@@ -301,121 +394,160 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playSnareSynth(time) {
-        const noiseSource = audioCtx.createBufferSource();
-        noiseSource.buffer = noiseBuffer;
-        const noiseFilter = audioCtx.createBiquadFilter();
-        noiseFilter.type = 'bandpass';
-        noiseFilter.frequency.setValueAtTime(1000, time);
-        const noiseGain = audioCtx.createGain();
-        noiseGain.gain.setValueAtTime(0.7, time);
-        noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
-        noiseSource.connect(noiseFilter);
-        noiseFilter.connect(noiseGain);
-        noiseGain.connect(masterGain);
+        // Body (tone)
         const osc = audioCtx.createOscillator();
         const oscGain = audioCtx.createGain();
+        osc.type = 'triangle';
         osc.frequency.setValueAtTime(180, time);
-        oscGain.gain.setValueAtTime(0.5, time);
-        oscGain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+        osc.frequency.exponentialRampToValueAtTime(80, time + 0.1);
+        oscGain.gain.setValueAtTime(0.7, time);
+        oscGain.gain.exponentialRampToValueAtTime(0.01, time + 0.15);
         osc.connect(oscGain);
         oscGain.connect(masterGain);
-        noiseSource.start(time);
-        noiseSource.stop(time + 0.25);
         osc.start(time);
-        osc.stop(time + 0.15);
-    }
+        osc.stop(time + 0.2);
 
-    function playHatSynth(time, open) {
-        const source = audioCtx.createBufferSource();
-        source.buffer = noiseBuffer;
+        // Snap (noise)
+        if (!noiseBuffer) return;
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = noiseBuffer;
         const filter = audioCtx.createBiquadFilter();
         filter.type = 'highpass';
-        filter.frequency.setValueAtTime(open ? 6500 : 7000, time);
-        const gain = audioCtx.createGain();
-        const decay = open ? 0.35 : 0.05;
-        gain.gain.setValueAtTime(0.4, time);
-        gain.gain.exponentialRampToValueAtTime(0.01, time + decay);
-        source.connect(filter);
-        filter.connect(gain);
-        gain.connect(masterGain);
-        source.start(time);
-        source.stop(time + decay + 0.05);
+        filter.frequency.setValueAtTime(1000, time);
+        const noiseGain = audioCtx.createGain();
+        noiseGain.gain.setValueAtTime(0.8, time);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+        noise.connect(filter);
+        filter.connect(noiseGain);
+        noiseGain.connect(masterGain);
+        noise.start(time);
+        noise.stop(time + 0.25);
     }
 
-    function playTomSynth(time, freq) {
+    function playHatSynth(time, isOpen = false) {
+        if (!noiseBuffer) return;
+        const duration = isOpen ? 0.35 : 0.05;
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = noiseBuffer;
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(7000, time);
+        filter.Q.setValueAtTime(3.0, time);
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.6, time);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(masterGain);
+        noise.start(time);
+        noise.stop(time + duration + 0.05);
+    }
+
+    function playTomSynth(time, baseFreq = 150) {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(baseFreq * 1.5, time);
+        osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.7, time + 0.2);
+        gain.gain.setValueAtTime(0.8, time);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.25);
         osc.connect(gain);
         gain.connect(masterGain);
-        osc.frequency.setValueAtTime(freq, time);
-        osc.frequency.exponentialRampToValueAtTime(freq * 0.5, time + 0.25);
-        gain.gain.setValueAtTime(0.8, time);
-        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
         osc.start(time);
-        osc.stop(time + 0.35);
+        osc.stop(time + 0.3);
     }
 
     function playClap(time) {
-        const play = (delay) => {
-            const s = audioCtx.createBufferSource();
-            s.buffer = noiseBuffer;
-            const f = audioCtx.createBiquadFilter();
-            f.type = 'bandpass';
-            f.frequency.setValueAtTime(1200, time + delay);
-            const g = audioCtx.createGain();
-            const dur = delay < 0.03 ? 0.015 : 0.25;
-            g.gain.setValueAtTime(0.6, time + delay);
-            g.gain.exponentialRampToValueAtTime(0.01, time + delay + dur);
-            s.connect(f); f.connect(g); g.connect(masterGain);
-            s.start(time + delay);
-            s.stop(time + delay + dur + 0.05);
-        };
-        play(0); play(0.015); play(0.03);
+        if (!noiseBuffer) return;
+        const bursts = [0, 0.011, 0.024];
+        bursts.forEach((offset, idx) => {
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = noiseBuffer;
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(1200, time + offset);
+            filter.Q.setValueAtTime(2.0, time + offset);
+            const gain = audioCtx.createGain();
+            const dur = (idx === bursts.length - 1) ? 0.18 : 0.02;
+            gain.gain.setValueAtTime(0.6, time + offset);
+            gain.gain.exponentialRampToValueAtTime(0.01, time + offset + dur);
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(masterGain);
+            noise.start(time + offset);
+            noise.stop(time + offset + dur + 0.02);
+        });
     }
 
     function playCowbell(time) {
-        const osc1 = audioCtx.createOscillator();
-        const osc2 = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        const filter = audioCtx.createBiquadFilter();
-        filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(800, time);
-        osc1.frequency.setValueAtTime(560, time);
-        osc2.frequency.setValueAtTime(845, time);
-        gain.gain.setValueAtTime(0.5, time);
-        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.15);
-        osc1.connect(filter); osc2.connect(filter);
-        filter.connect(gain); gain.connect(masterGain);
-        osc1.start(time); osc2.start(time);
-        osc1.stop(time + 0.2); osc2.stop(time + 0.2);
+        const f1 = 800, f2 = 540;
+        [f1, f2].forEach(freq => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(freq, time);
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(freq, time);
+            filter.Q.setValueAtTime(8.0, time);
+            gain.gain.setValueAtTime(0.3, time);
+            gain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(masterGain);
+            osc.start(time);
+            osc.stop(time + 0.25);
+        });
     }
 
     function playRimshot(time) {
         const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(450, time);
+        osc.frequency.exponentialRampToValueAtTime(120, time + 0.03);
+        gain.gain.setValueAtTime(0.7, time);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.04);
+        osc.connect(gain);
+        gain.connect(masterGain);
+        osc.start(time);
+        osc.stop(time + 0.06);
+
+        if (!noiseBuffer) return;
         const noise = audioCtx.createBufferSource();
         noise.buffer = noiseBuffer;
-        const oscGain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.setValueAtTime(2500, time);
         const noiseGain = audioCtx.createGain();
-        const noiseFilter = audioCtx.createBiquadFilter();
-        noiseFilter.type = 'highpass';
-        noiseFilter.frequency.setValueAtTime(2000, time);
-        osc.frequency.setValueAtTime(400, time);
-        oscGain.gain.setValueAtTime(0.6, time);
-        oscGain.gain.exponentialRampToValueAtTime(0.01, time + 0.03);
-        noiseGain.gain.setValueAtTime(0.4, time);
-        noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.04);
-        osc.connect(oscGain); oscGain.connect(masterGain);
-        noise.connect(noiseFilter); noiseFilter.connect(noiseGain);
+        noiseGain.gain.setValueAtTime(0.5, time);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.03);
+        noise.connect(filter);
+        filter.connect(noiseGain);
         noiseGain.connect(masterGain);
-        osc.start(time); osc.stop(time + 0.05);
-        noise.start(time); noise.stop(time + 0.06);
+        noise.start(time);
+        noise.stop(time + 0.05);
     }
 
-    // Trigger target sound
-    function playSound(instId, time) {
-        if (muteStates[instId]) return;
+    function playMetronomeClick(time, isDownbeat) {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(isDownbeat ? 1400 : 900, time);
+        gain.gain.setValueAtTime(0.25, time);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.035);
+        osc.connect(gain);
+        gain.connect(masterGain);
+        osc.start(time);
+        osc.stop(time + 0.04);
+    }
 
-        // If acoustic sample is loaded, play it
+    // --- Master Sound Player ---
+    function playSound(instId, time) {
+        if (!audioCtx || muteStates[instId]) return;
+
+        // Try playing acoustic sample first
         if (buffers[instId]) {
             const src = audioCtx.createBufferSource();
             src.buffer = buffers[instId];
@@ -458,11 +590,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function scheduleStep(step, time) {
+        // Play scheduled drum hits
         instruments.forEach(inst => {
             if (grid[inst.id][step]) {
                 playSound(inst.id, time);
             }
         });
+
+        // Metronome quarter note click (every 4 steps)
+        if (metronomeEnabled && step % 4 === 0) {
+            playMetronomeClick(time, step === 0);
+        }
+
         const delayMs = Math.max(0, (time - audioCtx.currentTime) * 1000);
         setTimeout(() => highlightStepUI(step), delayMs);
     }
@@ -524,49 +663,71 @@ document.addEventListener('DOMContentLoaded', () => {
             labelArea.appendChild(trackControls);
             track.appendChild(labelArea);
 
-            // Steps
+            // Steps row
             const stepsWrapper = document.createElement('div');
             stepsWrapper.classList.add('track-steps');
-            for (let i = 0; i < TOTAL_STEPS; i++) {
-                const node = document.createElement('button');
+
+            for (let step = 0; step < TOTAL_STEPS; step++) {
+                const node = document.createElement('div');
                 node.classList.add('step-node');
-                node.setAttribute('aria-label', `${inst.name} step ${i + 1}`);
-                node.dataset.instrument = inst.id;
-                node.dataset.step = i;
-                if (grid[inst.id][i]) node.classList.add('active-step');
+                node.dataset.inst = inst.id;
+                node.dataset.step = step;
+
+                if (grid[inst.id][step]) {
+                    node.classList.add('active-step');
+                }
+
                 node.addEventListener('click', () => {
-                    initAudio();
-                    const state = !grid[inst.id][i];
-                    grid[inst.id][i] = state;
-                    node.classList.toggle('active-step', state);
-                    if (!isPlaying && state) playSound(inst.id, audioCtx.currentTime);
+                    grid[inst.id][step] = !grid[inst.id][step];
+                    node.classList.toggle('active-step', grid[inst.id][step]);
+                    if (grid[inst.id][step]) {
+                        initAudio();
+                        if (audioCtx.state === 'suspended') audioCtx.resume();
+                        playSound(inst.id, audioCtx.currentTime);
+                    }
+                    if (activeBank !== null) {
+                        autoSaveBank(activeBank);
+                    }
                 });
+
                 stepsWrapper.appendChild(node);
             }
+
             track.appendChild(stepsWrapper);
             gridContainer.appendChild(track);
         });
     }
 
-    function highlightStepUI(step) {
+    function highlightStepUI(stepIndex) {
+        // Indicators
         const indicators = stepsIndicatorContainer.children;
-        Array.from(indicators).forEach((ind, i) => {
-            ind.classList.toggle('active', i === step);
-            if (step % 4 === 0 && i === step) {
-                ind.classList.add('active-accent');
+        for (let i = 0; i < indicators.length; i++) {
+            indicators[i].classList.remove('active', 'active-accent');
+        }
+        if (indicators[stepIndex]) {
+            if (stepIndex % 4 === 0) {
+                indicators[stepIndex].classList.add('active-accent');
             } else {
-                ind.classList.remove('active-accent');
+                indicators[stepIndex].classList.add('active');
             }
-        });
-        const nodes = document.querySelectorAll(`.step-node[data-step="${step}"]`);
-        nodes.forEach(node => {
-            node.classList.add('playing-highlight');
-            setTimeout(() => node.classList.remove('playing-highlight'), 150);
+        }
+
+        // Active node flash
+        const prevStep = (stepIndex - 1 + TOTAL_STEPS) % TOTAL_STEPS;
+        const prevNodes = gridContainer.querySelectorAll(`.step-node[data-step="${prevStep}"]`);
+        prevNodes.forEach(node => node.classList.remove('playing-highlight'));
+
+        const currentNodes = gridContainer.querySelectorAll(`.step-node[data-step="${stepIndex}"]`);
+        currentNodes.forEach(node => {
+            const instId = node.dataset.inst;
+            if (grid[instId][stepIndex]) {
+                node.classList.add('playing-highlight');
+            }
         });
     }
 
-    function loadPreset(presetName) {
-        const preset = presets[presetName];
+    function loadPreset(name) {
+        const preset = presets[name];
         if (!preset) return;
         bpm = preset.bpm;
         swing = preset.swing;
@@ -583,15 +744,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Visualizer ---
     function drawVisualizer() {
         requestAnimationFrame(drawVisualizer);
+        if (!analyser) return;
+
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
         analyser.getByteTimeDomainData(dataArray);
-        canvasCtx.fillStyle = 'rgba(15, 18, 27, 0.4)';
-        canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-        canvasCtx.lineWidth = 2.5;
-        canvasCtx.strokeStyle = 'rgb(0, 242, 254)';
-        canvasCtx.shadowBlur = 8;
-        canvasCtx.shadowColor = 'rgba(0, 242, 254, 0.6)';
+
+        if (currentTheme === 'plum') {
+            canvasCtx.fillStyle = 'rgba(24, 13, 33, 0.45)';
+            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+            canvasCtx.lineWidth = 2.5;
+            canvasCtx.strokeStyle = '#d48244';
+            canvasCtx.shadowBlur = 10;
+            canvasCtx.shadowColor = 'rgba(243, 156, 18, 0.8)';
+        } else {
+            canvasCtx.fillStyle = 'rgba(15, 18, 27, 0.45)';
+            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+            canvasCtx.lineWidth = 2.5;
+            canvasCtx.strokeStyle = 'rgb(0, 242, 254)';
+            canvasCtx.shadowBlur = 8;
+            canvasCtx.shadowColor = 'rgba(0, 242, 254, 0.6)';
+        }
+
         canvasCtx.beginPath();
         const sliceWidth = canvas.width / bufferLength;
         let x = 0;
@@ -606,9 +780,9 @@ document.addEventListener('DOMContentLoaded', () => {
         canvasCtx.shadowBlur = 0;
     }
 
-    // --- Event Listeners ---
+    // --- Playback Controls ---
 
-    btnPlay.addEventListener('click', () => {
+    function togglePlayPause() {
         initAudio();
         if (audioCtx.state === 'suspended') audioCtx.resume();
         if (!isPlaying) {
@@ -626,9 +800,9 @@ document.addEventListener('DOMContentLoaded', () => {
             btnPlay.classList.add('btn-primary');
             clearTimeout(timerId);
         }
-    });
+    }
 
-    btnStop.addEventListener('click', () => {
+    function stopPlayback() {
         isPlaying = false;
         btnPlay.innerHTML = '<span class="icon">▶</span> Play';
         btnPlay.classList.remove('btn-secondary');
@@ -638,59 +812,77 @@ document.addEventListener('DOMContentLoaded', () => {
         Array.from(stepsIndicatorContainer.children).forEach(ind => {
             ind.classList.remove('active', 'active-accent');
         });
-    });
+    }
+
+    btnPlay.addEventListener('click', togglePlayPause);
+    btnStop.addEventListener('click', stopPlayback);
 
     btnClear.addEventListener('click', () => {
         instruments.forEach(inst => grid[inst.id].fill(false));
         buildGridUI();
     });
 
-    // Slider helper
+    // Slider helpers
     const bindSlider = (el, valEl, cb) => {
         const handler = (e) => {
-            if (valEl) valEl.textContent = e.target.value;
-            cb(parseFloat(e.target.value));
+            const val = e.target.value;
+            valEl.textContent = val;
+            cb(val);
         };
         el.addEventListener('input', handler);
         el.addEventListener('change', handler);
     };
 
-    bindSlider(inputBpm, valBpm, v => { bpm = v; });
-    bindSlider(inputSwing, valSwing, v => { swing = v; });
-    bindSlider(inputVolume, null, v => {
-        if (masterGain) masterGain.gain.setValueAtTime(v / 100, audioCtx.currentTime);
+    bindSlider(inputBpm, valBpm, (v) => { bpm = parseInt(v); });
+    bindSlider(inputSwing, valSwing, (v) => { swing = parseInt(v); });
+    bindSlider(inputVolume, { set textContent(v) {} }, (v) => {
+        if (masterGain && audioCtx) {
+            masterGain.gain.setValueAtTime(v / 100, audioCtx.currentTime);
+        }
     });
     bindSlider(inputPunch, valPunch, () => updateCompressor());
-    bindSlider(inputBass, valBass, v => {
-        if (bassFilter) bassFilter.gain.setValueAtTime(v, audioCtx.currentTime);
+    bindSlider(inputBass, valBass, (v) => {
+        if (bassFilter && audioCtx) {
+            bassFilter.gain.setValueAtTime(parseFloat(v), audioCtx.currentTime);
+        }
     });
-    bindSlider(inputTreble, valTreble, v => {
-        if (trebleFilter) trebleFilter.gain.setValueAtTime(v, audioCtx.currentTime);
+    bindSlider(inputTreble, valTreble, (v) => {
+        if (trebleFilter && audioCtx) {
+            trebleFilter.gain.setValueAtTime(parseFloat(v), audioCtx.currentTime);
+        }
     });
 
     // Tap Tempo
-    btnTap.addEventListener('click', () => {
-        initAudio();
-        tapTimes.push(performance.now());
+    function handleTapTempo() {
+        const now = Date.now();
+        tapTimes.push(now);
         if (tapTimes.length > 4) tapTimes.shift();
+
         if (tapTimes.length > 1) {
             let intervals = [];
-            for (let i = 1; i < tapTimes.length; i++) intervals.push(tapTimes[i] - tapTimes[i - 1]);
-            const avg = intervals.reduce((a, b) => a + b) / intervals.length;
-            const tapped = Math.round(60000 / avg);
-            if (tapped >= 60 && tapped <= 220) {
-                bpm = tapped;
+            for (let i = 1; i < tapTimes.length; i++) {
+                intervals.push(tapTimes[i] - tapTimes[i - 1]);
+            }
+            // Check for timeout (> 2000ms reset)
+            if (intervals[intervals.length - 1] > 2000) {
+                tapTimes = [now];
+                return;
+            }
+            const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+            const calculatedBpm = Math.round(60000 / avgInterval);
+            if (calculatedBpm >= 60 && calculatedBpm <= 220) {
+                bpm = calculatedBpm;
                 inputBpm.value = bpm;
                 valBpm.textContent = bpm;
             }
         }
-    });
+    }
+    btnTap.addEventListener('click', handleTapTempo);
 
-    // Presets
+    // Preset Buttons
     presetButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
             presetButtons.forEach(b => b.classList.remove('active'));
-            // Deactivate active bank button if preset is selected
             if (activeBank !== null) {
                 const activeBtn = document.querySelector(`.btn-bank[data-bank="${activeBank}"]`);
                 if (activeBtn) activeBtn.classList.remove('active');
@@ -723,17 +915,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Silently auto-save the current bank's state to localStorage (no prompt)
     function autoSaveBank(index) {
         if (index === null) return;
-
-        // Deep copy the grid
         const gridCopy = {};
         instruments.forEach(inst => {
             gridCopy[inst.id] = [...grid[inst.id]];
         });
 
-        // Preserve existing name, or use a default
         const rawData = localStorage.getItem(`beatsync_bank_${index}`);
         let existingName = `Bank ${index + 1}`;
         if (rawData) {
@@ -751,54 +939,46 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         localStorage.setItem(`beatsync_bank_${index}`, JSON.stringify(beatData));
-
-        // Update button UI
-        const btn = document.querySelector(`.btn-bank[data-bank="${index}"]`);
-        if (btn) {
-            btn.innerHTML = `<span class="indicator"></span> ${existingName}`;
-            btn.classList.add('populated');
+        const activeBtn = document.querySelector(`.btn-bank[data-bank="${index}"]`);
+        if (activeBtn) {
+            activeBtn.innerHTML = `<span class="indicator"></span> ${beatData.name}`;
+            activeBtn.classList.add('populated');
         }
     }
 
     function switchToBank(index) {
-        // Auto-save the currently active bank before switching
-        if (activeBank !== null) {
+        if (activeBank !== null && activeBank !== index) {
             autoSaveBank(activeBank);
         }
 
         activeBank = index;
 
-        // Update button highlights
-        presetButtons.forEach(btn => btn.classList.remove('active'));
-        bankButtons.forEach(btn => btn.classList.remove('active'));
-        const activeBtn = document.querySelector(`.btn-bank[data-bank="${index}"]`);
-        if (activeBtn) activeBtn.classList.add('active');
+        bankButtons.forEach(b => b.classList.remove('active'));
+        presetButtons.forEach(b => b.classList.remove('active'));
 
-        // Load data from localStorage
+        const targetBtn = document.querySelector(`.btn-bank[data-bank="${index}"]`);
+        if (targetBtn) targetBtn.classList.add('active');
+
         const rawData = localStorage.getItem(`beatsync_bank_${index}`);
         if (rawData) {
             try {
                 const data = JSON.parse(rawData);
                 bpm = data.bpm || 120;
                 swing = data.swing || 0;
-
-                // Restore grid
-                instruments.forEach(inst => {
-                    grid[inst.id] = [...(data.grid[inst.id] || new Array(TOTAL_STEPS).fill(false))];
-                });
-
-                // Update UI sliders
                 inputBpm.value = bpm;
                 valBpm.textContent = bpm;
                 inputSwing.value = swing;
                 valSwing.textContent = swing;
 
+                instruments.forEach(inst => {
+                    grid[inst.id] = data.grid[inst.id] ? [...data.grid[inst.id]] : new Array(TOTAL_STEPS).fill(false);
+                });
+
                 buildGridUI();
-            } catch (err) {
-                console.error("Error parsing saved beat:", err);
+            } catch (e) {
+                console.error("Failed to parse bank data:", e);
             }
         } else {
-            // Empty bank — start fresh
             instruments.forEach(inst => grid[inst.id].fill(false));
             bpm = 120;
             swing = 0;
@@ -810,7 +990,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Explicit save: prompts for a name and saves the current grid to the active bank
     function saveBank(index) {
         if (index === null) {
             alert("Please click and select a User Bank (Bank 1 - Bank 6) first to save your beat.");
@@ -830,11 +1009,10 @@ document.addEventListener('DOMContentLoaded', () => {
             name = testName || `Beat ${index + 1}`;
         } else {
             const prompted = prompt("Enter a name for this custom beat:", currentName || `My Beat ${index + 1}`);
-            if (prompted === null) return; // Cancelled
+            if (prompted === null) return;
             name = prompted.trim() || `Beat ${index + 1}`;
         }
 
-        // Deep copy the grid so we save a snapshot
         const gridCopy = {};
         instruments.forEach(inst => {
             gridCopy[inst.id] = [...grid[inst.id]];
@@ -864,6 +1042,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnSaveBeat.addEventListener('click', () => {
         saveBank(activeBank);
+    });
+
+    // --- Global Keyboard Shortcuts ---
+    window.addEventListener('keydown', (e) => {
+        // If typing in an input or modal prompt, ignore hotkeys
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        if (e.key === ' ' || e.code === 'Space') {
+            e.preventDefault();
+            togglePlayPause();
+        } else if (e.key === 's' || e.key === 'S') {
+            stopPlayback();
+        } else if (e.key === 't' || e.key === 'T') {
+            handleTapTempo();
+        } else if (e.key === 'c' || e.key === 'C') {
+            instruments.forEach(inst => grid[inst.id].fill(false));
+            buildGridUI();
+        } else if (e.key === 'Escape') {
+            closeSettings();
+        } else if (['1', '2', '3', '4', '5', '6'].includes(e.key)) {
+            const presetKeys = ['rock', 'blues', 'funk', 'hiphop', 'metal', 'jazz'];
+            const idx = parseInt(e.key) - 1;
+            if (presetKeys[idx]) {
+                presetButtons.forEach(b => b.classList.remove('active'));
+                const targetBtn = document.querySelector(`.btn-preset[data-preset="${presetKeys[idx]}"]`);
+                if (targetBtn) targetBtn.classList.add('active');
+                if (activeBank !== null) {
+                    const activeBtn = document.querySelector(`.btn-bank[data-bank="${activeBank}"]`);
+                    if (activeBtn) activeBtn.classList.remove('active');
+                    activeBank = null;
+                }
+                loadPreset(presetKeys[idx]);
+            }
+        }
     });
 
     // Boot

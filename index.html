@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="plum">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,8 +8,8 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=3">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
     <div class="app-container">
@@ -24,8 +24,19 @@
                 <span class="tag">GUITAR COMPANION</span>
             </div>
             
-            <div class="visualizer-container">
-                <canvas id="visualizer" width="300" height="60"></canvas>
+            <div class="header-right">
+                <div class="theme-switcher">
+                    <button id="btn-theme-plum" class="theme-btn active" title="Shallot Plum Theme">🧅 Plum</button>
+                    <button id="btn-theme-neon" class="theme-btn" title="Cyberpunk Neon Theme">⚡ Neon</button>
+                </div>
+
+                <div class="visualizer-container">
+                    <canvas id="visualizer" width="280" height="50"></canvas>
+                </div>
+
+                <button id="btn-open-settings" class="btn-icon" title="Open Settings" aria-label="Settings">
+                    <span class="icon">⚙️</span>
+                </button>
             </div>
         </header>
 
@@ -145,10 +156,121 @@
 
         <footer class="app-footer">
             <p>Designed for bedroom guitarists. Plug in, tune up, and jam. 🎸</p>
+            <span class="footer-version" id="footer-app-version">BeatSync v1.2.0</span>
         </footer>
     </div>
 
-    <script src="app.js?v=3"></script>
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <div class="modal-card glass">
+            <div class="modal-header">
+                <div class="modal-title-area">
+                    <span class="modal-icon">⚙️</span>
+                    <h2 id="settings-title">Settings</h2>
+                </div>
+                <button id="btn-close-settings" class="btn-close" aria-label="Close Settings">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- App Version & Info Banner -->
+                <div class="settings-section version-banner">
+                    <div class="version-info">
+                        <span class="app-name">BeatSync</span>
+                        <span class="version-badge" id="settings-app-version">v1.2.0</span>
+                    </div>
+                    <p class="version-subtitle">Guitar Backing Track Drum Machine & Step Sequencer</p>
+                    <div class="build-meta">
+                        <span>Revision: <strong>1.2.0 (Shallot Edition)</strong></span>
+                        <span>Engine: <strong>Web Audio API 24-bit</strong></span>
+                    </div>
+                </div>
+
+                <!-- Theme Settings -->
+                <div class="settings-section">
+                    <h3>Visual Theme</h3>
+                    <div class="theme-options">
+                        <label class="theme-card-option active" data-theme-choice="plum">
+                            <input type="radio" name="settings-theme" value="plum" checked>
+                            <div class="theme-card-preview plum-preview">
+                                <span class="preview-dot plum-bg"></span>
+                                <span class="preview-dot copper-bg"></span>
+                                <span class="preview-dot gold-bg"></span>
+                            </div>
+                            <div class="theme-card-text">
+                                <strong>Shallot Plum</strong>
+                                <small>Velvet plum & copper glow</small>
+                            </div>
+                        </label>
+
+                        <label class="theme-card-option" data-theme-choice="neon">
+                            <input type="radio" name="settings-theme" value="neon">
+                            <div class="theme-card-preview neon-preview">
+                                <span class="preview-dot neon-bg"></span>
+                                <span class="preview-dot cyan-bg"></span>
+                                <span class="preview-dot magenta-bg"></span>
+                            </div>
+                            <div class="theme-card-text">
+                                <strong>Cyberpunk Neon</strong>
+                                <small>Graphite, cyan & magenta</small>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Audio & Sequencer Preferences -->
+                <div class="settings-section">
+                    <h3>Audio & Sequencer Preferences</h3>
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <strong>Metronome Quarter-Click</strong>
+                            <small>Subtle woodblock tick on quarter notes during playback</small>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-metronome">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <strong>Lookahead Timing Engine</strong>
+                            <small>Rock-solid Web Audio scheduler (25ms buffer)</small>
+                        </div>
+                        <span class="status-pill">Active</span>
+                    </div>
+                </div>
+
+                <!-- Keyboard Shortcuts Reference -->
+                <div class="settings-section">
+                    <h3>Keyboard Shortcuts</h3>
+                    <div class="shortcuts-grid">
+                        <div class="shortcut-item"><kbd>Space</kbd> <span>Play / Pause</span></div>
+                        <div class="shortcut-item"><kbd>S</kbd> <span>Stop & Rewind</span></div>
+                        <div class="shortcut-item"><kbd>T</kbd> <span>Tap Tempo</span></div>
+                        <div class="shortcut-item"><kbd>C</kbd> <span>Clear Grid</span></div>
+                        <div class="shortcut-item"><kbd>1 - 6</kbd> <span>Load Presets</span></div>
+                        <div class="shortcut-item"><kbd>Esc</kbd> <span>Close Modal</span></div>
+                    </div>
+                </div>
+
+                <!-- Data & Bank Reset -->
+                <div class="settings-section danger-zone">
+                    <h3>Storage & Banks</h3>
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <strong>Reset Saved Beats</strong>
+                            <small>Clear all 6 custom user bank patterns from memory</small>
+                        </div>
+                        <button id="btn-reset-banks" class="btn btn-small btn-danger-outline">Reset Banks</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button id="btn-done-settings" class="btn btn-primary">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js?v=5"></script>
 </body>
 </html>
-
