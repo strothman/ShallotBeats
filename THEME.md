@@ -1,6 +1,6 @@
 # Shallot Plum Theme Specification 🧅🎨
-**Signature Deep Plum & Copper Glow Design System for BeatSync**
-*Copyright (c) 2026 Shallot (strothman)*
+**Signature Deep Plum & Copper Glow Design System for ShallotBeats**
+*Copyright (c) 2026 Shallot (strothman) — MIT License*
 
 ---
 
@@ -21,9 +21,9 @@
 
 ---
 
-## 💻 How Themes Work in BeatSync
+## 💻 How Themes Work in ShallotBeats
 
-BeatSync supports hot theme switching between **Shallot Plum** and **Cyberpunk Neon**:
-- Active theme is persisted across sessions in `localStorage.getItem('beatsync_theme')`.
+ShallotBeats supports hot theme switching between **Shallot Plum** and **Cyberpunk Neon**:
+- Active theme is persisted across sessions in `localStorage.getItem('shallotbeats_theme')`.
 - CSS variables automatically update panels, sliders, grid nodes, ambient lighting, and buttons.
 - The real-time Web Audio API waveform visualizer adapts its stroke color and glowing shadows dynamically.

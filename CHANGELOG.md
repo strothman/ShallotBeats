@@ -1,6 +1,6 @@
-# Changelog 🥁📝
+# Changelog 🧅🥁📝
 
-All notable changes to the **BeatSync** project are documented in this file.
+All notable changes to the **ShallotBeats** project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
@@ -10,6 +10,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Additional genre presets (Latin Bossa, Double Bass Metal, Reggae).
 - MIDI keyboard / pad input trigger support.
 - WAV audio pattern export capability.
+
+---
+
+## [1.3.0] - 2026-08-28
+
+### Added
+- **Official MIT License**:
+  - Added [`LICENSE`](LICENSE) for `Copyright (c) 2026 Shallot (strothman)`.
+- **ShallotBeats Rebranding**:
+  - Rebranded project from BeatSync to **ShallotBeats** across UI, header logo, metadata, and documentation.
+  - Upgraded launcher scripts to reflect ShallotBeats.
+  - Updated storage keys with seamless backwards compatibility.
 
 ---
 

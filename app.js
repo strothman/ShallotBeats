@@ -1,7 +1,8 @@
-// BeatSync App Logic — 18 Instruments × 32 Steps
+// ShallotBeats App Logic — 18 Instruments × 32 Steps
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Application Version ---
-    const APP_VERSION = '1.2.0';
+    // --- Application Metadata ---
+    const APP_NAME = 'ShallotBeats';
+    const APP_VERSION = '1.3.0';
 
     // --- State and Config ---
     let audioCtx = null;
@@ -218,15 +219,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Version Display
     if (settingsAppVersion) settingsAppVersion.textContent = `v${APP_VERSION}`;
-    if (footerAppVersion) footerAppVersion.textContent = `BeatSync v${APP_VERSION}`;
+    if (footerAppVersion) footerAppVersion.textContent = `${APP_NAME} v${APP_VERSION}`;
 
     // --- Theme Management ---
-    let currentTheme = localStorage.getItem('beatsync_theme') || 'plum';
+    let currentTheme = localStorage.getItem('shallotbeats_theme') || localStorage.getItem('beatsync_theme') || 'plum';
 
     function applyTheme(theme) {
         currentTheme = theme;
         document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('beatsync_theme', theme);
+        localStorage.setItem('shallotbeats_theme', theme);
 
         if (btnThemePlum && btnThemeNeon) {
             btnThemePlum.classList.toggle('active', theme === 'plum');

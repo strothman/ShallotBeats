@@ -1,6 +1,6 @@
-# BeatSync 🥁🎸
+# ShallotBeats 🧅🥁🎸
 
-> **Interactive Step Sequencer & Guitar Backing Drum Machine**  
+> **Interactive Step Sequencer & Guitar Backing Drum Machine by Shallot**  
 > Powered by the Web Audio API with Pearl Master Studio acoustic samples, synthetic percussion, master FX chain, Shallot Plum theme, and full settings control.
 
 ---
@@ -14,7 +14,7 @@
 - **Guitar Backing Presets**: Instant loadouts for **Rock**, **Blues Shuffle** (with 50% swing), **Funk Groove**, **Hip Hop**, **Heavy Metal**, and **Swing Jazz**.
 - **6 User Save Banks**: Save, rename, and recall custom drum patterns with automatic state persistence (`localStorage`).
 - **App Settings & Preferences (⚙️)**:
-  - Version & build tracking badge (`v1.2.0`).
+  - Version & build tracking badge (`v1.3.0`).
   - Visual theme selector with live color preview cards.
   - Metronome quarter-note count-in / click toggle.
   - Keyboard shortcuts reference sheet.
@@ -53,7 +53,7 @@ launch.bat
 ```text
 launch_silent.vbs
 ```
-This opens BeatSync as a clean, dedicated desktop application window (via Microsoft Edge / Chrome `--app` mode) **without leaving any command prompt console window open**.
+This opens ShallotBeats as a clean, dedicated desktop application window (via Microsoft Edge / Chrome `--app` mode) **without leaving any command prompt console window open**.
 
 ### 2. Static Web Browser
 Simply double-click `index.html` or open with any modern web browser.
@@ -84,7 +84,7 @@ Then navigate to `http://localhost:3000`.
 
 ## 🎨 Themes & Design Tokens
 
-BeatSync uses CSS variables defined in [`shallot-theme.css`](shallot-theme.css) and documented in [`THEME.md`](THEME.md):
+ShallotBeats uses CSS variables defined in [`shallot-theme.css`](shallot-theme.css) and documented in [`THEME.md`](THEME.md):
 
 - **Plum Theme (Default)**: Deep plum surfaces with copper glow highlights.
 - **Neon Theme**: Electric cyan and purple cyberpunk aesthetic.
@@ -98,6 +98,7 @@ Theme preference is automatically stored in your browser's `localStorage` and re
 ```text
 audio-drums/
 ├── CHANGELOG.md             # Version history and revision log
+├── LICENSE                  # MIT License
 ├── README.md                # Documentation and user manual
 ├── THEME.md                 # Design token specification
 ├── app.js                   # Sequencer audio engine & UI controller
@@ -113,4 +114,4 @@ audio-drums/
 ---
 
 ## 📄 License
-MIT License. Created for musicians and developers.
+MIT License. Copyright (c) 2026 Shallot (strothman). See [LICENSE](LICENSE) for details.
